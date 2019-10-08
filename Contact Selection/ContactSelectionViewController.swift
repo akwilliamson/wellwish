@@ -81,8 +81,12 @@ class ContactSelectionViewController: UIViewController {
     
     // MARK: - Properties
     
-    let contacts: [CNContact]
+    public var delegate: ListViewDelegate?
+    
+    private let contacts: [CNContact]
     private var viewModel: ContactSelectionViewModel
+    private let contactsManager = ContactsManager()
+    private let coreDataManager = CoreDataManager(modelName: "Person")
     
     // MARK: - Initialization
     
@@ -102,6 +106,7 @@ class ContactSelectionViewController: UIViewController {
         super.viewDidLoad()
         viewModel.delegate = self
         configureView()
+        constructViews()
         constrainViews()
         tableView.reloadData()
     }
@@ -113,13 +118,14 @@ class ContactSelectionViewController: UIViewController {
         }
     }
     
-    private func constrainViews() {
-        // Subviews
+    private func constructViews() {
         view.addSubview(toggleAllButton)
         view.addSubview(skipButton)
         view.addSubview(tableView)
         view.addSubview(importSelectedButton)
-        
+    }
+    
+    private func constrainViews() {
         NSLayoutConstraint.activate([
             toggleAllButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 15),
             toggleAllButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 15)
@@ -152,11 +158,26 @@ class ContactSelectionViewController: UIViewController {
         if #available(iOS 13.0, *) {
             isModalInPresentation = false
         }
+        delegate?.willDismissContactSelection()
         dismiss(animated: true, completion: nil)
     }
     
     @objc private func importSelectedTapped(sender: UIButton) {
+        let selectedContacts = contacts.enumerated().compactMap { (index, contact) in
+            return viewModel.isContactSelected(for: index) ? contact : nil
+        }
         
+        selectedContacts.forEach { contact in
+            let person = Person(context: coreDataManager.managedContext)
+            person.firstName = contact.givenName
+            person.lastName = contact.familyName
+            person.birthdate = contactsManager.birthDate(from: contact.birthday)
+            person.anniversary = contactsManager.anniversaryDate(from: contact.dates)
+        }
+
+        coreDataManager.saveContext()
+        delegate?.willDismissContactSelection()
+        dismiss(animated: true, completion: nil)
     }
 }
 
@@ -173,8 +194,8 @@ extension ContactSelectionViewController: UITableViewDataSource {
         let selectionCell = ContactSelectionCell()
         
         selectionCell.contact = contacts[indexPath.row]
-        let isSelected = viewModel.contactSelectionState(for: indexPath.row)
-        selectionCell.contactIsSelected(isSelected: isSelected)
+        let isSelected = viewModel.isContactSelected(for: indexPath.row)
+        selectionCell.setSelectedState(isSelected: isSelected)
         selectionCell.setupViews()
         
         return selectionCell
@@ -190,7 +211,7 @@ extension ContactSelectionViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let isSelected = viewModel.toggleContactSelection(at: indexPath)
         let selectionCell = tableView.cellForRow(at: indexPath) as? ContactSelectionCell
-        selectionCell?.contactIsSelected(isSelected: isSelected)
+        selectionCell?.setSelectedState(isSelected: isSelected)
     }
 }
 

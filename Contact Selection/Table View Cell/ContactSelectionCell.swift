@@ -82,8 +82,9 @@ class ContactSelectionCell: UITableViewCell {
     // MARK: - Properties
     
     var contact: CNContact?
-    
     private var viewModel = ContactSelectionCellViewModel()
+    
+    // MARK: - Initialization
     
     required init(coder aDecoder: NSCoder) {
          fatalError("init(coder:) has not been implemented")
@@ -91,13 +92,19 @@ class ContactSelectionCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        selectionStyle = .none
         viewModel.delegate = self
     }
     
+    // MARK: - View Setup
+    
     public func setupViews() {
+        configureView()
         constructViews()
         constrainViews()
+    }
+    
+    private func configureView() {
+        selectionStyle = .none
     }
     
     private func constructViews() {
@@ -156,10 +163,12 @@ class ContactSelectionCell: UITableViewCell {
     
     // MARK: - Methods
     
-    public func contactIsSelected(isSelected: Bool) {
+    public func setSelectedState(isSelected: Bool) {
         viewModel.setSelectedState(isSelected: isSelected)
     }
 }
+
+// MARK: ContactSelectionCellDelegate
 
 extension ContactSelectionCell: ContactSelectionCellDelegate {
     

@@ -36,4 +36,23 @@ class ContactsManager {
             completion([], error)
         }
     }
+
+    // Get the birth date from the contact's birthday property if it exists
+    public func birthDate(from dateComponents: DateComponents?)  -> Date? {
+        guard let dateComponents = dateComponents else {  return nil }
+
+        return dateComponents.date
+    }
+
+    // Get the anniversary date from the generic components if it exists
+    public func anniversaryDate(from dateComponents: [CNLabeledValue<NSDateComponents>]) -> Date? {
+        guard dateComponents.isEmpty == false else {  return nil }
+
+        let anniversaryValue = dateComponents.filter { date -> Bool in
+            return date.label?.contains("Anniversary") ?? false
+        }
+
+        let anniversaryComponents = anniversaryValue.first?.value as DateComponents?
+        return anniversaryComponents?.date
+    }
 }

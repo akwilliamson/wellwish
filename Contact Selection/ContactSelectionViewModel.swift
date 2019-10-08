@@ -46,7 +46,7 @@ struct ContactSelectionViewModel {
         delegate?.setToggleAllText(toggleAllText)
     }
     
-    public func contactSelectionState(for row: Int) -> Bool {
+    public func isContactSelected(for row: Int) -> Bool {
         return contactSelectionStates[row]
     }
     

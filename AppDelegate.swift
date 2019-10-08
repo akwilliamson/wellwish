@@ -12,10 +12,6 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    
-    var hasSeenLaunchViewController: Bool {
-        return UserDefaults.standard.bool(forKey: "HasSeenLaunchViewController")
-    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
@@ -26,11 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     private func getInitialViewController() -> UIViewController {
-//        switch hasSeenLaunchViewController {
-//        case true:
-//            return ListViewController()
-//        case false:
-            return LaunchViewController()
-//        }
+        return ListViewController()
     }
 }
